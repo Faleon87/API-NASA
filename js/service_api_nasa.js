@@ -1,5 +1,8 @@
+// En service_api_nasa.js
+
 const apiKey = 'gEDeWAK4aqBfdsi3N9uXGFINbe2lz1ulkOGJIpDP';
 const sol = 1000; // El número de sol que deseas consultar
+const numImagesToShow = 50; // Cambia este número para controlar la cantidad de imágenes a mostrar
 
 // URL del API de la NASA
 const apiUrl = `https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=${sol}&api_key=${apiKey}`;
@@ -17,19 +20,43 @@ fetch(apiUrl)
         console.log(data);
 
         // Seleccionar el elemento con la clase "rover-photo"
-        const valor = document.querySelector(".rover-photo");
+        const roverPhotoContainer = document.querySelector(".rover-photo");
 
-        let imgHTML = "";
+        // Crear un fragmento de documento para mejorar el rendimiento de la manipulación del DOM
+        const fragment = document.createDocumentFragment();
 
-        for (let index = 0; index < 50; index++) {
-            // Crear un elemento <img> por cada imagen en data.photos
-            imgHTML+= `<h1>${data.photos[index].camera.full_name}</h1>`
-            imgHTML += `<img id="imagenes" src="${data.photos[index].img_src}">`;
-            
+        // Utilizar un bucle for para limitar la cantidad de imágenes a mostrar
+        for (let index = 0; index < numImagesToShow && index < data.photos.length; index++) {
+            const photo = data.photos[index];
+
+            // Crear un elemento div para cada imagen y detalles
+            const imageContainer = document.createElement("div");
+            imageContainer.classList.add("image");
+
+            // Crear la etiqueta de imagen <img>
+            const imgElement = document.createElement("img");
+            imgElement.src = photo.img_src;
+
+            // Crear elementos para el nombre completo de la cámara y la fecha en la Tierra
+            const cameraNameElement = document.createElement("p");
+            cameraNameElement.classList.add("full-name");
+            cameraNameElement.textContent = ` Name: ${photo.camera.full_name}`;
+
+            const earthDateElement = document.createElement("p");
+            earthDateElement.classList.add("earth-date");
+            earthDateElement.textContent = `Earth Date: ${photo.earth_date}`;
+
+            // Agregar elementos al contenedor
+            imageContainer.appendChild(imgElement);
+            imageContainer.appendChild(cameraNameElement);
+            imageContainer.appendChild(earthDateElement);
+
+            // Agregar el contenedor de imagen al fragmento de documento
+            fragment.appendChild(imageContainer);
         }
 
-        // Agregar los elementos <img> al div con la clase "rover-photo"
-        valor.innerHTML = imgHTML;
+        // Agregar el fragmento de documento al contenedor principal
+        roverPhotoContainer.appendChild(fragment);
     })
     .catch((error) => {
         console.error('Ocurrió un error:', error);
